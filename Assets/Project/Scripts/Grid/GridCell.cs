@@ -1,7 +1,7 @@
 ﻿using Project.Scripts.Units;
 using UnityEngine;
 
-namespace Project.Scripts.Level
+namespace Project.Scripts.Grid
 {
     public class GridCell
     {

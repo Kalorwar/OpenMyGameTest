@@ -5,8 +5,4 @@ namespace Project.Scripts.Other
         Fire = 0,
         Water = 1
     }
-
-    namespace Project.Scripts.Level
-    {
-    }
 }

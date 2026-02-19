@@ -1,6 +1,7 @@
 {
   "Width": 7,
-  "Height": 7,
+  "Height": 3,
+  "_comment": "Type: 0 = Fire, 1 = Water",
   "Units": [
     {
       "Type": "1",

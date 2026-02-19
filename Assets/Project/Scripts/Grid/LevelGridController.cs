@@ -4,7 +4,7 @@ using Project.Scripts.Units;
 using UnityEditor;
 using UnityEngine;
 
-namespace Project.Scripts.Level
+namespace Project.Scripts.Grid
 {
     public class LevelGridController : MonoBehaviour
     {
