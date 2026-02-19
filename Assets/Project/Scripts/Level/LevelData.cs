@@ -11,26 +11,26 @@ namespace Project.Scripts.Level
         private const int DefaultWidth = 6;
         private const int DefaultHeight = 7;
 
-        public int width;
-        public int height;
-        public List<UnitEntry> units;
+        public int Width;
+        public int Height;
+        public List<UnitEntry> Units;
 
         public void ValidateLevel(string fileName)
         {
-            if (width <= 0 || height <= 0)
+            if (Width <= 0 || Height <= 0)
             {
-                Debug.LogError($"[JsonLevelParser] ERROR: Invalid grid size ({width}x{height}) in '{fileName}'. " +
+                Debug.LogError($"[JsonLevelParser] ERROR: Invalid grid size ({Width}x{Height}) in '{fileName}'. " +
                                $"Resetting to {DefaultWidth}x{DefaultHeight}.");
 
-                width = DefaultWidth;
-                height = DefaultHeight;
+                Width = DefaultWidth;
+                Height = DefaultHeight;
             }
 
-            if (units != null)
+            if (Units != null)
             {
-                for (var i = 0; i < units.Count; i++)
+                for (var i = 0; i < Units.Count; i++)
                 {
-                    units[i].Validate(i, fileName);
+                    Units[i].Validate(i, fileName);
                 }
             }
         }

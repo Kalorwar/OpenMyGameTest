@@ -1,36 +1,36 @@
 {
-  "width": 6,
-  "height": 7,
-  "units": [
+  "Width": 7,
+  "Height": 7,
+  "Units": [
     {
-      "type": "1",
-      "cellX": 2,
-      "cellY": 1
+      "Type": "1",
+      "CellX": 1,
+      "CellY": 0
     },
     {
-      "type": "1",
-      "cellX": 2,
-      "cellY": 2
+      "Type": "1",
+      "CellX": 1,
+      "CellY": 1
     },
     {
-      "type": "1",
-      "cellX": 4,
-      "cellY": 1
+      "Type": "1",
+      "CellX": 3,
+      "CellY": 0
     },
     {
-      "type": "0",
-      "cellX": 4,
-      "cellY": 2
+      "Type": "0",
+      "CellX": 3,
+      "CellY": 1
     },
     {
-      "type": "0",
-      "cellX": 5,
-      "cellY": 1
+      "Type": "0",
+      "CellX": 4,
+      "CellY": 0
     },
     {
-      "type": "0",
-      "cellX": 6,
-      "cellY": 1
+      "Type": "0",
+      "CellX": 5,
+      "CellY": 0
     }
   ]
 }
