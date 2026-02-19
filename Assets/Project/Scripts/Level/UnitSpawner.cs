@@ -3,6 +3,7 @@ using Project.Scripts.Grid;
 using Project.Scripts.Other;
 using Project.Scripts.Units;
 using UnityEngine;
+using Zenject;
 
 namespace Project.Scripts.Level
 {
@@ -11,42 +12,29 @@ namespace Project.Scripts.Level
         private const float BaseCellSize = 0.8f;
         private const float BaseUnitScale = 1f;
 
-        [Header("Grid")] [SerializeField] private LevelGridController _gridController;
-
         [Header("Prefabs")] [SerializeField] private Unit _fireUnitPrefab;
 
         [SerializeField] private Unit _waterUnitPrefab;
-
-        [Header("Level")] [SerializeField] private string _levelFileName = "Level_1";
-
         [SerializeField] private Transform _unitsParent;
-
-        private LevelData _currentLevelData;
+        [SerializeField] private LevelGridController _gridController;
+        private ILevelDataProvider _levelDataProvider;
         private List<Unit> _spawnedUnits = new();
+
+        [Inject]
+        private void Construct(ILevelDataProvider levelDataProvider)
+        {
+            _levelDataProvider = levelDataProvider;
+        }
 
         private void Start()
         {
-            SpawnLevel();
+            SpawnUnits();
         }
 
-        public void SpawnLevel()
+        private void SpawnUnits()
         {
-            _currentLevelData = JsonLevelParser.LoadLevel(_levelFileName);
-
-            if (_currentLevelData == null)
-            {
-                Debug.LogError($"[UnitSpawner] Failed to load level: {_levelFileName}");
-                return;
-            }
-
-            _gridController.Initialize(_currentLevelData.Width, _currentLevelData.Height);
-
-            SpawnUnits(_currentLevelData);
-        }
-
-        private void SpawnUnits(LevelData levelData)
-        {
-            if (levelData.Units == null || levelData.Units.Count == 0)
+            if (_levelDataProvider.CurrentLevelData.Units == null ||
+                _levelDataProvider.CurrentLevelData.Units.Count == 0)
             {
                 Debug.LogWarning("[UnitSpawner] No units to spawn");
                 return;
@@ -55,7 +43,7 @@ namespace Project.Scripts.Level
             var scaleMultiplier = _gridController.CellSize / BaseCellSize;
             var units = new List<Unit>();
 
-            foreach (var unitData in levelData.Units)
+            foreach (var unitData in _levelDataProvider.CurrentLevelData.Units)
             {
                 var prefab = GetPrefab(unitData.Type);
 
@@ -78,7 +66,7 @@ namespace Project.Scripts.Level
 
             for (var i = 0; i < units.Count; i++)
             {
-                var unitData = levelData.Units[i];
+                var unitData = _levelDataProvider.CurrentLevelData.Units[i];
                 var x = (int)unitData.CellX;
                 var y = (int)unitData.CellY;
 
