@@ -5,18 +5,15 @@ namespace Project.Scripts.Grid
 {
     public class GridNormalizer
     {
-        private readonly MonoBehaviour _coroutineHost;
-
         private readonly float _delay;
         private readonly GridLayoutCalculator _layout;
         private readonly GridStorage _storage;
         private Coroutine _normalizeCoroutine;
 
-        public GridNormalizer(GridStorage storage, GridLayoutCalculator layout, MonoBehaviour host, float delay)
+        public GridNormalizer(GridStorage storage, GridLayoutCalculator layout, float delay)
         {
             _storage = storage;
             _layout = layout;
-            _coroutineHost = host;
             _delay = delay;
         }
 
@@ -44,15 +41,15 @@ namespace Project.Scripts.Grid
             return false;
         }
 
-        public void StartNormalize(int width, int height)
+        public void StartNormalize(int width, int height, MonoBehaviour coroutineHost)
         {
             if (_normalizeCoroutine == null)
             {
-                _normalizeCoroutine = _coroutineHost.StartCoroutine(NormalizeRoutine(width, height));
+                _normalizeCoroutine = coroutineHost.StartCoroutine(NormalizeTick(width, height));
             }
         }
 
-        private IEnumerator NormalizeRoutine(int width, int height)
+        private IEnumerator NormalizeTick(int width, int height)
         {
             yield return new WaitForSeconds(_delay);
 
@@ -73,9 +70,11 @@ namespace Project.Scripts.Grid
 
                             var targetCell = _storage.GetCell(x, writeY);
                             targetCell.SetUnit(unit);
+                            var worldPos = _layout.GetCellCenter(x, writeY);
 
-                            unit.transform.position = _layout.GetCellCenter(x, writeY);
-                            unit.ChangeSortOrder(writeY * 10 + x);
+                            var sortOrder = writeY * 10 + x;
+
+                            unit.AnimateMoveTo(worldPos, sortOrder);
                         }
 
                         writeY++;

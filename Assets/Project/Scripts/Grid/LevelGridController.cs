@@ -33,7 +33,7 @@ namespace Project.Scripts.Grid
             _layout.Calculate(Camera.main, _width, _height);
 
             _storage = new GridStorage(_width, _height);
-            _normalizer = new GridNormalizer(_storage, _layout, this, NormalizeGridDelay);
+            _normalizer = new GridNormalizer(_storage, _layout, NormalizeGridDelay);
         }
 
         public void PlaceUnitAtCell(Unit unit, int x, int y)
@@ -53,7 +53,6 @@ namespace Project.Scripts.Grid
         {
             var fromCell = _storage.GetCell(fromX, fromY);
             var toCell = _storage.GetCell(toX, toY);
-
             if (fromCell == null || toCell == null)
             {
                 return;
@@ -61,9 +60,7 @@ namespace Project.Scripts.Grid
 
             if (!toCell.IsOccupied)
             {
-                var unit = fromCell.OccupiedUnit;
-                fromCell.ClearUnit();
-                PlaceUnitAtCell(unit, toX, toY);
+                MoveUnit(fromCell.OccupiedUnit, toCell);
             }
             else
             {
@@ -72,7 +69,7 @@ namespace Project.Scripts.Grid
 
             if (_normalizer.NeedsNormalization(_width, _height))
             {
-                _normalizer.StartNormalize(_width, _height);
+                _normalizer.StartNormalize(_width, _height, this);
             }
         }
 
@@ -99,8 +96,27 @@ namespace Project.Scripts.Grid
             fromCell.ClearUnit();
             toCell.ClearUnit();
 
-            PlaceUnitAtCell(unitA, toCell.Position.x, toCell.Position.y);
-            PlaceUnitAtCell(unitB, fromCell.Position.x, fromCell.Position.y);
+            fromCell.SetUnit(unitB);
+            toCell.SetUnit(unitA);
+
+            var posA = _layout.GetCellCenter(toCell.Position.x, toCell.Position.y);
+            var posB = _layout.GetCellCenter(fromCell.Position.x, fromCell.Position.y);
+
+            unitA.AnimateMoveTo(posA, toCell.Position.y * 10 + toCell.Position.x);
+            unitB.AnimateMoveTo(posB, fromCell.Position.y * 10 + fromCell.Position.x);
+        }
+
+
+        private void MoveUnit(Unit unit, GridCell toCell)
+        {
+            var currentCell = _storage.GetCellOfUnit(unit);
+            currentCell.ClearUnit();
+            toCell.SetUnit(unit);
+
+            var worldPos = _layout.GetCellCenter(toCell.Position.x, toCell.Position.y);
+            var sortOrder = toCell.Position.y * 10 + toCell.Position.x;
+
+            unit.AnimateMoveTo(worldPos, sortOrder);
         }
     }
 }
