@@ -44,7 +44,7 @@ namespace Project.Scripts.Level
                 return;
             }
 
-            var scaleMultiplier = _gridController.CellSize / BaseCellSize;
+            var scaleMultiplier = _gridController.GetCellSize() / BaseCellSize;
             var units = new List<Unit>();
 
             foreach (var unitData in _levelDataProvider.CurrentLevelData.Units)
