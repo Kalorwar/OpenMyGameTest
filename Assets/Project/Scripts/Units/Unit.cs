@@ -14,7 +14,7 @@ namespace Project.Scripts.Units
             _spriteRenderer = GetComponent<SpriteRenderer>();
         }
 
-        public void Initialize(int sortOrder)
+        public void ChangeSortOrder(int sortOrder)
         {
             _spriteRenderer.sortingOrder = sortOrder;
         }

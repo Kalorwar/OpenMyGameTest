@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2184993284392509330}
   - component: {fileID: 69510840519091914}
   - component: {fileID: 3948173186893896476}
+  - component: {fileID: 1535340803814187212}
   m_Layer: 0
   m_Name: FireUnit
   m_TagString: Untagged
@@ -152,3 +153,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Units.Unit
   _elementType: 0
+--- !u!114 &1535340803814187212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6981361736151053091}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 053bde1cc96542a5b9b64cdfaf7ce1df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Units.UnitSwipeHandler
+  _unit: {fileID: 3948173186893896476}

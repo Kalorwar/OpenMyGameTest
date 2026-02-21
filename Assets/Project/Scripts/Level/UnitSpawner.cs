@@ -16,14 +16,18 @@ namespace Project.Scripts.Level
 
         [SerializeField] private Unit _waterUnitPrefab;
         [SerializeField] private Transform _unitsParent;
-        [SerializeField] private LevelGridController _gridController;
+        private DiContainer _container;
+        private LevelGridController _gridController;
         private ILevelDataProvider _levelDataProvider;
         private List<Unit> _spawnedUnits = new();
 
         [Inject]
-        private void Construct(ILevelDataProvider levelDataProvider)
+        private void Construct(ILevelDataProvider levelDataProvider, LevelGridController gridController,
+            DiContainer container)
         {
             _levelDataProvider = levelDataProvider;
+            _gridController = gridController;
+            _container = container;
         }
 
         private void Start()
@@ -53,10 +57,8 @@ namespace Project.Scripts.Level
                     continue;
                 }
 
-                var unit = Instantiate(prefab, Vector3.zero, Quaternion.identity, _unitsParent);
-
-                var sortOrder = (int)unitData.CellY * 10 + (int)unitData.CellX;
-                unit.Initialize(sortOrder);
+                var unit = _container.InstantiatePrefabForComponent<Unit>(prefab, Vector3.zero, Quaternion.identity,
+                    _unitsParent);
 
                 var unitScale = BaseUnitScale * scaleMultiplier;
                 unit.transform.localScale = new Vector3(unitScale, unitScale, 1);

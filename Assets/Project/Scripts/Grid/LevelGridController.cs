@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Project.Scripts.Level;
 using Project.Scripts.Units;
@@ -10,6 +11,7 @@ namespace Project.Scripts.Grid
 {
     public class LevelGridController : MonoBehaviour
     {
+        private const float NormalizeGridDelay = 0.3f;
         private const float ScreenFillAmount = 0.95f;
         [SerializeField] private float _fixedBottomGridY = -2.9f;
 
@@ -19,6 +21,7 @@ namespace Project.Scripts.Grid
 
         private ILevelDataProvider _levelDataProvider;
         private Camera _mainCamera;
+        private Coroutine _normalizeGridCoroutine;
 
         private int _width;
 
@@ -99,14 +102,80 @@ namespace Project.Scripts.Grid
             {
                 cell.SetUnit(unit);
                 unit.transform.position = GetCellCenter(x, y);
+                var sortOrder = y * 10 + x;
+                unit.ChangeSortOrder(sortOrder);
             }
         }
 
-        public void RemoveUnitFromCell(int x, int y)
+        public GridCell GetCell(int x, int y)
         {
-            var cell = GetCell(x, y);
-            cell?.ClearUnit();
+            return Cells.FirstOrDefault(cell => cell.Position.x == x && cell.Position.y == y);
         }
+
+        public GridCell GetCellOfUnit(Unit unit)
+        {
+            return Cells.FirstOrDefault(c => c.OccupiedUnit == unit);
+        }
+
+        public void TryMoveUnit(int fromX, int fromY, int toX, int toY)
+        {
+            var fromCell = GetCell(fromX, fromY);
+            var toCell = GetCell(toX, toY);
+
+            if (fromCell == null || toCell == null)
+            {
+                return;
+            }
+
+            if (!toCell.IsOccupied)
+            {
+                var unit = fromCell.OccupiedUnit;
+                fromCell.ClearUnit();
+                PlaceUnitAtCell(unit, toX, toY);
+            }
+            else
+            {
+                SwapUnits(fromCell, toCell);
+            }
+
+            if (GridNeedsNormalization())
+            {
+                StartNormalize();
+            }
+        }
+
+        private bool GridNeedsNormalization()
+        {
+            for (var x = 0; x < _width; x++)
+            {
+                var foundEmpty = false;
+
+                for (var y = 0; y < _height; y++)
+                {
+                    var cell = GetCell(x, y);
+
+                    if (!cell.IsOccupied)
+                    {
+                        foundEmpty = true;
+                    }
+                    else if (foundEmpty)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private void StartNormalize()
+        {
+            if (_normalizeGridCoroutine == null)
+            {
+                _normalizeGridCoroutine = StartCoroutine(NormalizeGridDelayTick());
+            }
+        }
+
 
         private void CalculateOptimalGridPosition()
         {
@@ -122,7 +191,6 @@ namespace Project.Scripts.Grid
             CellSize = Mathf.Min(cellSizeByWidth, cellSizeByHeight);
 
             var totalGridWidth = _width * CellSize;
-            var totalGridHeight = _height * CellSize;
 
             _gridStartPosition = new Vector3(
                 -totalGridWidth / 2,
@@ -140,9 +208,48 @@ namespace Project.Scripts.Grid
             );
         }
 
-        private GridCell GetCell(int x, int y)
+        private void SwapUnits(GridCell fromCell, GridCell toCell)
         {
-            return Cells.FirstOrDefault(cell => cell.Position.x == x && cell.Position.y == y);
+            var unitA = fromCell.OccupiedUnit;
+            var unitB = toCell.OccupiedUnit;
+
+            fromCell.ClearUnit();
+            toCell.ClearUnit();
+
+            PlaceUnitAtCell(unitA, toCell.Position.x, toCell.Position.y);
+            PlaceUnitAtCell(unitB, fromCell.Position.x, fromCell.Position.y);
+        }
+
+        private void NormalizeGrid()
+        {
+            for (var x = 0; x < _width; x++)
+            {
+                var writeY = 0;
+
+                for (var y = 0; y < _height; y++)
+                {
+                    var cell = GetCell(x, y);
+
+                    if (cell.IsOccupied)
+                    {
+                        if (y != writeY)
+                        {
+                            var unit = cell.OccupiedUnit;
+                            cell.ClearUnit();
+                            PlaceUnitAtCell(unit, x, writeY);
+                        }
+
+                        writeY++;
+                    }
+                }
+            }
+        }
+
+        private IEnumerator NormalizeGridDelayTick()
+        {
+            yield return new WaitForSeconds(NormalizeGridDelay);
+            NormalizeGrid();
+            _normalizeGridCoroutine = null;
         }
     }
 }
