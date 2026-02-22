@@ -13,7 +13,7 @@ namespace Project.Scripts.Level
 
         public int Width;
         public int Height;
-        public List<UnitEntry> Units;
+        public List<UnitData> Units;
 
         public void ValidateLevel(string fileName)
         {

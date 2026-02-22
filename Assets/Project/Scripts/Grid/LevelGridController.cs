@@ -1,4 +1,5 @@
 ﻿using Project.Scripts.Level;
+using Project.Scripts.Other;
 using Project.Scripts.Units;
 using UnityEngine;
 using Zenject;
@@ -8,23 +9,35 @@ namespace Project.Scripts.Grid
     public class LevelGridController : MonoBehaviour
     {
         private const float ScreenFillAmount = 0.95f;
-        private const float NormalizeGridDelay = 0.3f;
         private const float FixedBottomGridY = -2.9f;
 
+        private GridMatchesFinder _matchesFinder;
         private int _height;
         private GridLayoutCalculator _layout;
         private ILevelDataProvider _levelDataProvider;
         private GridNormalizer _normalizer;
+        private IPlayerInputState _playerInputState;
         private GridStorage _storage;
         private int _width;
 
         [Inject]
-        private void Construct(ILevelDataProvider levelDataProvider)
+        private void Construct(ILevelDataProvider levelDataProvider, IPlayerInputState playerInputState)
         {
             _levelDataProvider = levelDataProvider;
+            _playerInputState = playerInputState;
         }
 
         private void Awake()
+        {
+            InitializeGrid();
+        }
+
+        public void OnDestroy()
+        {
+            _normalizer?.Dispose();
+        }
+
+        private void InitializeGrid()
         {
             _width = _levelDataProvider.CurrentLevelData.Width;
             _height = _levelDataProvider.CurrentLevelData.Height;
@@ -33,44 +46,32 @@ namespace Project.Scripts.Grid
             _layout.Calculate(Camera.main, _width, _height);
 
             _storage = new GridStorage(_width, _height);
-            _normalizer = new GridNormalizer(_storage, _layout, NormalizeGridDelay);
+            _matchesFinder = new GridMatchesFinder(_storage);
+            _normalizer =
+                new GridNormalizer(_width, _height, _storage, _layout, this, _playerInputState, _matchesFinder);
         }
 
         public void PlaceUnitAtCell(Unit unit, int x, int y)
         {
-            var cell = _storage.GetCell(x, y);
+            var cell = GetValidCell(x, y);
             if (cell == null)
             {
                 return;
             }
 
             cell.SetUnit(unit);
-            unit.transform.position = _layout.GetCellCenter(x, y);
-            unit.ChangeSortOrder(y * 10 + x);
+            SetUnitPosition(unit, cell);
         }
 
         public void TryMoveUnit(int fromX, int fromY, int toX, int toY)
         {
-            var fromCell = _storage.GetCell(fromX, fromY);
-            var toCell = _storage.GetCell(toX, toY);
-            if (fromCell == null || toCell == null)
+            if (!TryGetMovePair(fromX, fromY, toX, toY, out var fromCell, out var toCell))
             {
                 return;
             }
 
-            if (!toCell.IsOccupied)
-            {
-                MoveUnit(fromCell.OccupiedUnit, toCell);
-            }
-            else
-            {
-                SwapUnits(fromCell, toCell);
-            }
-
-            if (_normalizer.NeedsNormalization(_width, _height))
-            {
-                _normalizer.StartNormalize(_width, _height, this);
-            }
+            ExecuteMove(fromCell, toCell);
+            _normalizer.TryNormalize();
         }
 
         public float GetCellSize()
@@ -88,6 +89,25 @@ namespace Project.Scripts.Grid
             return _storage.GetCellOfUnit(unit);
         }
 
+        private bool TryGetMovePair(int fromX, int fromY, int toX, int toY, out GridCell fromCell, out GridCell toCell)
+        {
+            fromCell = _storage.GetCell(fromX, fromY);
+            toCell = _storage.GetCell(toX, toY);
+            return fromCell != null && toCell != null;
+        }
+
+        private void ExecuteMove(GridCell fromCell, GridCell toCell)
+        {
+            if (toCell.IsOccupied)
+            {
+                SwapUnits(fromCell, toCell);
+            }
+            else
+            {
+                MoveUnit(fromCell.OccupiedUnit, toCell);
+            }
+        }
+
         private void SwapUnits(GridCell fromCell, GridCell toCell)
         {
             var unitA = fromCell.OccupiedUnit;
@@ -99,24 +119,46 @@ namespace Project.Scripts.Grid
             fromCell.SetUnit(unitB);
             toCell.SetUnit(unitA);
 
-            var posA = _layout.GetCellCenter(toCell.Position.x, toCell.Position.y);
-            var posB = _layout.GetCellCenter(fromCell.Position.x, fromCell.Position.y);
-
-            unitA.AnimateMoveTo(posA, toCell.Position.y * 10 + toCell.Position.x);
-            unitB.AnimateMoveTo(posB, fromCell.Position.y * 10 + fromCell.Position.x);
+            AnimateSwap(unitA, toCell, unitB, fromCell);
         }
 
+        private void AnimateSwap(Unit unitA, GridCell cellA, Unit unitB, GridCell cellB)
+        {
+            var posA = GetCellWorldPosition(cellA);
+            var posB = GetCellWorldPosition(cellB);
+
+            unitA.AnimateMoveTo(posA, GetSortOrder(cellA));
+            unitB.AnimateMoveTo(posB, GetSortOrder(cellB));
+        }
 
         private void MoveUnit(Unit unit, GridCell toCell)
         {
             var currentCell = _storage.GetCellOfUnit(unit);
             currentCell.ClearUnit();
             toCell.SetUnit(unit);
+            unit.AnimateMoveTo(GetCellWorldPosition(toCell), GetSortOrder(toCell));
+        }
 
-            var worldPos = _layout.GetCellCenter(toCell.Position.x, toCell.Position.y);
-            var sortOrder = toCell.Position.y * 10 + toCell.Position.x;
+        private void SetUnitPosition(Unit unit, GridCell cell)
+        {
+            unit.transform.position = GetCellWorldPosition(cell);
+            unit.ChangeSortOrder(GetSortOrder(cell));
+        }
 
-            unit.AnimateMoveTo(worldPos, sortOrder);
+        private Vector3 GetCellWorldPosition(GridCell cell)
+        {
+            return _layout.GetCellCenter(cell.Position.x, cell.Position.y);
+        }
+
+        private int GetSortOrder(GridCell cell)
+        {
+            return cell.Position.y * 10 + cell.Position.x;
+        }
+
+        private GridCell GetValidCell(int x, int y)
+        {
+            var cell = _storage.GetCell(x, y);
+            return cell?.IsOccupied == false ? cell : null;
         }
     }
 }

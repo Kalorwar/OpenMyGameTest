@@ -16,6 +16,7 @@ namespace Project.Scripts.Level
 
         [SerializeField] private Unit _waterUnitPrefab;
         [SerializeField] private Transform _unitsParent;
+
         private DiContainer _container;
         private LevelGridController _gridController;
         private ILevelDataProvider _levelDataProvider;
@@ -37,45 +38,80 @@ namespace Project.Scripts.Level
 
         private void SpawnUnits()
         {
-            if (_levelDataProvider.CurrentLevelData.Units == null ||
-                _levelDataProvider.CurrentLevelData.Units.Count == 0)
+            var levelData = _levelDataProvider.CurrentLevelData;
+
+            if (!HasValidUnitData(levelData))
             {
                 Debug.LogWarning("[UnitSpawner] No units to spawn");
                 return;
             }
 
-            var scaleMultiplier = _gridController.GetCellSize() / BaseCellSize;
-            var units = new List<Unit>();
+            var scaleMultiplier = CalculateScaleMultiplier();
+            var units = CreateUnits(levelData.Units, scaleMultiplier);
+            PlaceUnitsOnGrid(units, levelData.Units);
 
-            foreach (var unitData in _levelDataProvider.CurrentLevelData.Units)
+            _spawnedUnits = units;
+        }
+
+        private static bool HasValidUnitData(LevelData levelData)
+        {
+            return levelData.Units != null && levelData.Units.Count > 0;
+        }
+
+        private float CalculateScaleMultiplier()
+        {
+            return _gridController.GetCellSize() / BaseCellSize;
+        }
+
+        private List<Unit> CreateUnits(List<UnitData> unitEntries, float scaleMultiplier)
+        {
+            var units = new List<Unit>(unitEntries.Count);
+
+            foreach (var entry in unitEntries)
             {
-                var prefab = GetPrefab(unitData.Type);
-
-                if (prefab == null)
+                var unit = TryCreateUnit(entry, scaleMultiplier);
+                if (unit != null)
                 {
-                    Debug.LogError($"[UnitSpawner] No prefab for unit type: {unitData.Type}");
-                    continue;
+                    units.Add(unit);
                 }
-
-                var unit = _container.InstantiatePrefabForComponent<Unit>(prefab, Vector3.zero, Quaternion.identity,
-                    _unitsParent);
-
-                var unitScale = BaseUnitScale * scaleMultiplier;
-                unit.transform.localScale = new Vector3(unitScale, unitScale, 1);
-
-                units.Add(unit);
             }
 
+            return units;
+        }
+
+        private Unit TryCreateUnit(UnitData entry, float scaleMultiplier)
+        {
+            var prefab = GetPrefab(entry.Type);
+
+            if (prefab == null)
+            {
+                Debug.LogError($"[UnitSpawner] No prefab for unit type: {entry.Type}");
+                return null;
+            }
+
+            var unit = _container.InstantiatePrefabForComponent<Unit>(prefab, Vector3.zero, Quaternion.identity,
+                _unitsParent);
+
+            ApplyScale(unit, scaleMultiplier);
+
+            return unit;
+        }
+
+        private void ApplyScale(Unit unit, float scaleMultiplier)
+        {
+            var scale = BaseUnitScale * scaleMultiplier;
+            unit.transform.localScale = new Vector3(scale, scale, 1f);
+        }
+
+        private void PlaceUnitsOnGrid(List<Unit> units, List<UnitData> unitEntries)
+        {
             for (var i = 0; i < units.Count; i++)
             {
-                var unitData = _levelDataProvider.CurrentLevelData.Units[i];
-                var x = (int)unitData.CellX;
-                var y = (int)unitData.CellY;
+                var x = (int)unitEntries[i].CellX;
+                var y = (int)unitEntries[i].CellY;
 
                 _gridController.PlaceUnitAtCell(units[i], x, y);
             }
-
-            _spawnedUnits = units;
         }
 
         private Unit GetPrefab(ElementType type)

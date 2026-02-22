@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Project.Scripts.Other
 {
     [Serializable]
-    public class UnitEntry
+    public class UnitData
     {
         public ElementType Type;
         public float CellX;

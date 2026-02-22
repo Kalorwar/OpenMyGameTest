@@ -1,40 +1,44 @@
 using Project.Scripts.Grid;
+using Project.Scripts.Other;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using Zenject;
 
 namespace Project.Scripts.Units
 {
-    public class UnitSwipeHandler : MonoBehaviour, IPointerDownHandler, IDragHandler
+    public class SwipeHandler
     {
         private const float SwipeThreshold = 0.5f;
-        private Camera _camera;
+        private readonly Camera _camera;
+        private readonly LevelGridController _gridController;
+        private readonly IPlayerInputState _playerInputState;
 
-        private LevelGridController _gridController;
+        private readonly Unit _unit;
+
         private Vector2 _startPos;
         private bool _swipeDetected;
-        private Unit _unit;
 
-        [Inject]
-        public void Construct(LevelGridController grid)
+        public SwipeHandler(Unit unit, LevelGridController gridController, IPlayerInputState playerInputState)
         {
-            _gridController = grid;
+            _unit = unit;
+            _gridController = gridController;
+            _playerInputState = playerInputState;
+            _camera = Camera.main;
         }
 
-        private void Awake()
+        public void OnPointerDown(PointerEventData eventData)
         {
-            _unit = GetComponent<Unit>();
-            _camera = Camera.main;
+            _startPos = _camera.ScreenToWorldPoint(eventData.position);
+            _swipeDetected = false;
         }
 
         public void OnDrag(PointerEventData eventData)
         {
-            if (_swipeDetected)
+            if (_swipeDetected || !_playerInputState.PlayerCanAct)
             {
                 return;
             }
 
-            Vector2 currentPos = _camera.ScreenToWorldPoint(eventData.position);
+            var currentPos = (Vector2)_camera.ScreenToWorldPoint(eventData.position);
             var delta = currentPos - _startPos;
 
             if (delta.magnitude < SwipeThreshold)
@@ -43,25 +47,18 @@ namespace Project.Scripts.Units
             }
 
             _swipeDetected = true;
+            _playerInputState.SetPlayerCanAct(false);
 
-            Vector2Int dir;
-
-            if (Mathf.Abs(delta.x) > Mathf.Abs(delta.y))
-            {
-                dir = delta.x > 0 ? Vector2Int.right : Vector2Int.left;
-            }
-            else
-            {
-                dir = delta.y > 0 ? Vector2Int.up : Vector2Int.down;
-            }
-
-            TryMove(dir);
+            TryMove(GetDirection(delta));
         }
 
-        public void OnPointerDown(PointerEventData eventData)
+        private static Vector2Int GetDirection(Vector2 delta)
         {
-            _startPos = _camera.ScreenToWorldPoint(eventData.position);
-            _swipeDetected = false;
+            return Mathf.Abs(delta.x) > Mathf.Abs(delta.y)
+                ? delta.x > 0 ? Vector2Int.right : Vector2Int.left
+                : delta.y > 0
+                    ? Vector2Int.up
+                    : Vector2Int.down;
         }
 
         private void TryMove(Vector2Int dir)
@@ -74,7 +71,6 @@ namespace Project.Scripts.Units
 
             var newX = cell.Position.x + dir.x;
             var newY = cell.Position.y + dir.y;
-
             var targetCell = _gridController.GetCell(newX, newY);
 
             if (dir == Vector2Int.up && (targetCell == null || !targetCell.IsOccupied))
