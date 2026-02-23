@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 3948173186893896476}
   - component: {fileID: -5699864553587727309}
   m_Layer: 0
-  m_Name: FireUnit
+  m_Name: Unit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -84,7 +84,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 8328464969787361017, guid: e2da32ab89e2c974096f3018b6799302, type: 3}
+  m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -92,7 +92,7 @@ SpriteRenderer:
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
 --- !u!61 &69510840519091914
 BoxCollider2D:
@@ -152,7 +152,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23a0a6c25d4106e47849ec18d13d4947, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Units.Unit
-  _elementType: 0
   _animator: {fileID: -5699864553587727309}
 --- !u!95 &-5699864553587727309
 Animator:
@@ -164,7 +163,7 @@ Animator:
   m_GameObject: {fileID: 6981361736151053091}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 3333f26dfec0bfb43901f18a78bc81ec, type: 2}
+  m_Controller: {fileID: 0}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0

@@ -9,13 +9,12 @@ using Zenject;
 
 namespace Project.Scripts.Units
 {
-    [RequireComponent(typeof(SpriteRenderer))]
+    [RequireComponent(typeof(SpriteRenderer), typeof(BoxCollider2D), typeof(Animator))]
     public class Unit : MonoBehaviour, IPointerDownHandler, IDragHandler
     {
         private const float MoveAnimationDuration = 0.3f;
         private const float DestroyScaleDuration = 0.3f;
 
-        [SerializeField] private ElementType _elementType;
         [SerializeField] private Animator _animator;
         private Coroutine _destroyAnimationCoroutine;
 
@@ -29,7 +28,7 @@ namespace Project.Scripts.Units
             _swipeHandler = new SwipeHandler(this, grid, playerInputState);
         }
 
-        public ElementType ElementType => _elementType;
+        public string ElementType { get; private set; }
 
         private void Awake()
         {
@@ -51,6 +50,12 @@ namespace Project.Scripts.Units
         public void OnPointerDown(PointerEventData eventData)
         {
             _swipeHandler?.OnPointerDown(eventData);
+        }
+
+        public void Initialization(RuntimeAnimatorController animator, string elementType)
+        {
+            ElementType = elementType;
+            _animator.runtimeAnimatorController = animator;
         }
 
         public void ChangeSortOrder(int sortOrder)

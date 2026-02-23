@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using Project.Scripts.Datas;
 using Project.Scripts.Grid;
-using Project.Scripts.Other;
+using Project.Scripts.ScriptableObjects;
 using Project.Scripts.Units;
 using UnityEngine;
 using Zenject;
@@ -12,23 +14,23 @@ namespace Project.Scripts.Level
         private const float BaseCellSize = 0.8f;
         private const float BaseUnitScale = 1f;
 
-        [Header("Prefabs")] [SerializeField] private Unit _fireUnitPrefab;
-
-        [SerializeField] private Unit _waterUnitPrefab;
         [SerializeField] private Transform _unitsParent;
+        [SerializeField] private Unit _baseUnitPrefab;
 
         private DiContainer _container;
         private LevelGridController _gridController;
         private ILevelDataProvider _levelDataProvider;
         private List<Unit> _spawnedUnits = new();
+        private UnitConfiguration _unitConfiguration;
 
         [Inject]
         private void Construct(ILevelDataProvider levelDataProvider, LevelGridController gridController,
-            DiContainer container)
+            DiContainer container, UnitConfiguration unitConfiguration)
         {
             _levelDataProvider = levelDataProvider;
             _gridController = gridController;
             _container = container;
+            _unitConfiguration = unitConfiguration;
         }
 
         private void Start()
@@ -81,20 +83,31 @@ namespace Project.Scripts.Level
 
         private Unit TryCreateUnit(UnitData entry, float scaleMultiplier)
         {
-            var prefab = GetPrefab(entry.Type);
-
-            if (prefab == null)
+            var config = GetConfig(entry.UnitType);
+            if (config == null)
             {
-                Debug.LogError($"[UnitSpawner] No prefab for unit type: {entry.Type}");
+                Debug.LogError($"[UnitSpawner] No configuration found for unit type: {entry.UnitType}");
                 return null;
             }
 
-            var unit = _container.InstantiatePrefabForComponent<Unit>(prefab, Vector3.zero, Quaternion.identity,
-                _unitsParent);
+            var unit = _container.InstantiatePrefabForComponent<Unit>(_baseUnitPrefab, Vector3.zero,
+                Quaternion.identity, _unitsParent
+            );
 
+            ConfigureUnit(unit, config);
             ApplyScale(unit, scaleMultiplier);
 
             return unit;
+        }
+
+        private UnitConfigData GetConfig(string unitType)
+        {
+            return _unitConfiguration.Units.FirstOrDefault(u => u.UnitType == unitType);
+        }
+
+        private void ConfigureUnit(Unit unit, UnitConfigData config)
+        {
+            unit.Initialization(config.UnitAnimationController, config.UnitType);
         }
 
         private void ApplyScale(Unit unit, float scaleMultiplier)
@@ -112,11 +125,6 @@ namespace Project.Scripts.Level
 
                 _gridController.PlaceUnitAtCell(units[i], x, y);
             }
-        }
-
-        private Unit GetPrefab(ElementType type)
-        {
-            return type == ElementType.Fire ? _fireUnitPrefab : _waterUnitPrefab;
         }
     }
 }

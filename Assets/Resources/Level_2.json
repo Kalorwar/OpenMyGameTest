@@ -1,95 +1,94 @@
 {
   "Width": 6,
   "Height": 6,
-  "_comment": "Type: 0 = Fire, 1 = Water",
   "Units": [
     {
-      "Type": "1",
+      "UnitType": "Water",
       "CellX": 1,
       "CellY": 0
     },
     {
-      "Type": "1",
+      "UnitType": "Water",
       "CellX": 1,
       "CellY": 1
     },
     {
-      "Type": "1",
+      "UnitType": "Water",
       "CellX": 3,
       "CellY": 0
     },
     {
-      "Type": "1",
+      "UnitType": "Water",
       "CellX": 1,
       "CellY": 3
     },
     {
-      "Type": "1",
+      "UnitType": "Water",
       "CellX": 1,
       "CellY": 4
     },
     {
-      "Type": "1",
+      "UnitType": "Water",
       "CellX": 2,
       "CellY": 4
     },
     {
-      "Type": "1",
+      "UnitType": "Water",
       "CellX": 2,
       "CellY": 2
     },
     {
-      "Type": "1",
+      "UnitType": "Water",
       "CellX": 3,
       "CellY": 3
     },
     {
-      "Type": "1",
+      "UnitType": "Water",
       "CellX": 4,
       "CellY": 3
     },
     {
-      "Type": "1",
+      "UnitType": "Water",
       "CellX": 3,
       "CellY": 1
     },
     {
-      "Type": "1",
+      "UnitType": "Water",
       "CellX": 4,
       "CellY": 1
     },
     {
-      "Type": "1",
+      "UnitType": "Water",
       "CellX": 4,
       "CellY": 0
     },
     {
-      "Type": "0",
+      "UnitType": "Fire",
       "CellX": 1,
       "CellY": 2
     },
     {
-      "Type": "0",
+      "UnitType": "Fire",
       "CellX": 2,
       "CellY": 3
     },
     {
-      "Type": "0",
+      "UnitType": "Fire",
       "CellX": 3,
       "CellY": 2
     },
     {
-      "Type": "0",
+      "UnitType": "Fire",
       "CellX": 2,
       "CellY": 1
     },
     {
-      "Type": "0",
+      "UnitType": "Fire",
       "CellX": 4,
       "CellY": 2
     },
     {
-      "Type": "0",
+      "UnitType": "Fire",
       "CellX": 2,
       "CellY": 0
     }

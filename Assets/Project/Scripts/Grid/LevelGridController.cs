@@ -10,11 +10,11 @@ namespace Project.Scripts.Grid
     {
         private const float ScreenFillAmount = 0.95f;
         private const float FixedBottomGridY = -2.9f;
-
-        private GridMatchesFinder _matchesFinder;
         private int _height;
         private GridLayoutCalculator _layout;
         private ILevelDataProvider _levelDataProvider;
+
+        private GridMatchesFinder _matchesFinder;
         private GridNormalizer _normalizer;
         private IPlayerInputState _playerInputState;
         private GridStorage _storage;
@@ -152,7 +152,7 @@ namespace Project.Scripts.Grid
 
         private int GetSortOrder(GridCell cell)
         {
-            return cell.Position.y * 10 + cell.Position.x;
+            return GridSortOrderCalculator.Calculate(cell.Position.x, cell.Position.y);
         }
 
         private GridCell GetValidCell(int x, int y)

@@ -179,7 +179,7 @@ namespace Project.Scripts.Grid
             targetCell.SetUnit(move.Unit);
 
             var worldPos = _layout.GetCellCenter(move.FromX, move.ToY);
-            var sortOrder = move.ToY * 10 + move.FromX;
+            var sortOrder = GridSortOrderCalculator.Calculate(move.FromX, move.ToY);
 
             move.Unit.AnimateMoveTo(worldPos, sortOrder, onComplete);
         }

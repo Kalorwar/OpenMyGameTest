@@ -262,6 +262,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.ZenjectInstallers.LevelInstaller
   _levelGridController: {fileID: 6310776948646943338, guid: 283d242eb3a0db444be85c4fe025ac3a, type: 3}
+  _unitConfiguration: {fileID: 11400000, guid: 7da9ea1002f40eb43937b555062e1346, type: 2}
 --- !u!114 &517532490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -801,9 +802,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f085c7dfbc8a469f82d0dc639151bf08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.Level.UnitSpawner
-  _fireUnitPrefab: {fileID: 3948173186893896476, guid: 01274eb06370f4c46937a11280e33444, type: 3}
-  _waterUnitPrefab: {fileID: 6994083305802174597, guid: 2c1a2c19596ab394ba6c8022f6c3b3e1, type: 3}
   _unitsParent: {fileID: 1574946750}
+  _baseUnitPrefab: {fileID: 3948173186893896476, guid: 01274eb06370f4c46937a11280e33444, type: 3}
 --- !u!1 &1574946749
 GameObject:
   m_ObjectHideFlags: 0

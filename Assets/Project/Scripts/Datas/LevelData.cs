@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Project.Scripts.Other;
 using UnityEngine;
 
-namespace Project.Scripts.Level
+namespace Project.Scripts.Datas
 {
     [Serializable]
     public class LevelData
@@ -15,7 +14,8 @@ namespace Project.Scripts.Level
         public int Height;
         public List<UnitData> Units;
 
-        public void ValidateLevel(string fileName)
+        // Добавляем опциональный список валидных типов
+        public void ValidateLevel(string fileName, List<string> validUnitTypes = null)
         {
             if (Width <= 0 || Height <= 0)
             {
@@ -30,7 +30,7 @@ namespace Project.Scripts.Level
             {
                 for (var i = 0; i < Units.Count; i++)
                 {
-                    Units[i].Validate(i, fileName);
+                    Units[i].Validate(i, validUnitTypes);
                 }
             }
         }

@@ -1,10 +1,12 @@
+using System.Collections.Generic;
+using Project.Scripts.Datas;
 using UnityEngine;
 
 namespace Project.Scripts.Level
 {
     public static class JsonLevelParser
     {
-        public static LevelData LoadLevel(string fileName)
+        public static LevelData LoadLevel(string fileName, List<string> validUnitTypes = null)
         {
             var asset = Resources.Load<TextAsset>(fileName);
             if (asset == null)
@@ -17,7 +19,7 @@ namespace Project.Scripts.Level
 
             if (data != null)
             {
-                data.ValidateLevel(fileName);
+                data.ValidateLevel(fileName, validUnitTypes);
             }
             else
             {

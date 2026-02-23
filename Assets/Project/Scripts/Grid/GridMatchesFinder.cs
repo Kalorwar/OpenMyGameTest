@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Project.Scripts.Other;
 
 namespace Project.Scripts.Grid
 {
@@ -77,7 +76,7 @@ namespace Project.Scripts.Grid
             return area;
         }
 
-        private IEnumerable<GridCell> GetMatchingNeighbors(GridCell cell, ElementType type, bool[,] visited)
+        private IEnumerable<GridCell> GetMatchingNeighbors(GridCell cell, string type, bool[,] visited)
         {
             foreach (var neighbor in GetNeighbors(cell))
             {
@@ -88,7 +87,7 @@ namespace Project.Scripts.Grid
             }
         }
 
-        private bool IsValidMatch(GridCell neighbor, ElementType type, bool[,] visited)
+        private bool IsValidMatch(GridCell neighbor, string type, bool[,] visited)
         {
             if (visited[neighbor.Position.x, neighbor.Position.y])
             {

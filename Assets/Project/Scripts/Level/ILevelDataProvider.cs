@@ -1,4 +1,6 @@
-﻿namespace Project.Scripts.Level
+﻿using Project.Scripts.Datas;
+
+namespace Project.Scripts.Level
 {
     public interface ILevelDataProvider
     {
