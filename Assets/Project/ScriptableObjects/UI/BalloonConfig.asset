@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60ea08555324f964898fa8f56fb0d25a, type: 3}
+  m_Name: BalloonConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Scripts.ScriptableObjects.BalloonConfig
+  _sprites:
+  - {fileID: 4889548848047085371, guid: e297cbaed25a9a54eaf62adfef2b70e5, type: 3}
+  - {fileID: 5574635351299468239, guid: 679a0082148ac8f42a8dc13b433fa4cd, type: 3}
+  _minScale: 0.8
+  _maxScale: 1.1
+  _spawnDuration: 0.5
+  _minSpeed: 0.5
+  _maxSpeed: 1.5
+  _minSwayAmplitude: 0.3
+  _maxSwayAmplitude: 0.8
+  _minSwayFrequency: 0.2
+  _maxSwayFrequency: 0.5
+  _minHeight: -2
+  _maxHeight: 3
+  _spawnOffsetX: 3

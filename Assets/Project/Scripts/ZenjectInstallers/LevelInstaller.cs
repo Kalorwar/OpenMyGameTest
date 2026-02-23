@@ -14,9 +14,12 @@ namespace Project.Scripts.ZenjectInstallers
         [SerializeField] private UnitConfigurationSo _unitConfigurationSo;
         [SerializeField] private UnitSpawner _unitSpawner;
         [SerializeField] private GameSessionController _gameSessionController;
+        [SerializeField] private BalloonConfigSo _balloonConfigSo;
 
         public override void InstallBindings()
         {
+            Container.Bind<UnitConfigurationSo>().FromInstance(_unitConfigurationSo).AsSingle().NonLazy();
+            Container.Bind<BalloonConfigSo>().FromInstance(_balloonConfigSo).AsSingle().NonLazy();
             Container.Bind<IPlayerInputState>().To<PlayerInputState>().AsSingle().NonLazy();
             Container.Bind<ISaveLoadService>().To<SaveLoadService>().AsSingle().NonLazy();
             Container.Bind<ILevelDataProvider>().To<LevelDataProvider>().AsSingle().NonLazy();
@@ -25,7 +28,6 @@ namespace Project.Scripts.ZenjectInstallers
             Container.Bind<UnitSpawner>().FromComponentInNewPrefab(_unitSpawner).AsSingle().NonLazy();
             Container.Bind<GameSessionController>().FromComponentInNewPrefab(_gameSessionController).AsSingle()
                 .NonLazy();
-            Container.Bind<UnitConfigurationSo>().FromInstance(_unitConfigurationSo).AsSingle().NonLazy();
         }
     }
 }
