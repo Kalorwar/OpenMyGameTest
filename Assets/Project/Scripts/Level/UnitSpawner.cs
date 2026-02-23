@@ -3,6 +3,7 @@ using System.Linq;
 using Project.Scripts.Datas;
 using Project.Scripts.Grid;
 using Project.Scripts.ScriptableObjects;
+using Project.Scripts.Services;
 using Project.Scripts.Units;
 using UnityEngine;
 using Zenject;
@@ -14,31 +15,26 @@ namespace Project.Scripts.Level
         private const float BaseCellSize = 0.8f;
         private const float BaseUnitScale = 1f;
 
-        [SerializeField] private Transform _unitsParent;
         [SerializeField] private Unit _baseUnitPrefab;
 
         private DiContainer _container;
         private LevelGridController _gridController;
         private ILevelDataProvider _levelDataProvider;
-        private List<Unit> _spawnedUnits = new();
-        private UnitConfiguration _unitConfiguration;
+        private UnitConfigurationSo _unitConfigurationSo;
 
         [Inject]
         private void Construct(ILevelDataProvider levelDataProvider, LevelGridController gridController,
-            DiContainer container, UnitConfiguration unitConfiguration)
+            DiContainer container, UnitConfigurationSo unitConfigurationSo)
         {
             _levelDataProvider = levelDataProvider;
             _gridController = gridController;
             _container = container;
-            _unitConfiguration = unitConfiguration;
+            _unitConfigurationSo = unitConfigurationSo;
         }
 
-        private void Start()
-        {
-            SpawnUnits();
-        }
+        public List<Unit> SpawnedUnits { get; private set; } = new();
 
-        private void SpawnUnits()
+        public void SpawnUnits()
         {
             var levelData = _levelDataProvider.CurrentLevelData;
 
@@ -52,12 +48,12 @@ namespace Project.Scripts.Level
             var units = CreateUnits(levelData.Units, scaleMultiplier);
             PlaceUnitsOnGrid(units, levelData.Units);
 
-            _spawnedUnits = units;
+            SpawnedUnits = units;
         }
 
         private static bool HasValidUnitData(LevelData levelData)
         {
-            return levelData.Units != null && levelData.Units.Count > 0;
+            return levelData.Units != null && levelData.Units.Length > 0;
         }
 
         private float CalculateScaleMultiplier()
@@ -65,9 +61,9 @@ namespace Project.Scripts.Level
             return _gridController.GetCellSize() / BaseCellSize;
         }
 
-        private List<Unit> CreateUnits(List<UnitData> unitEntries, float scaleMultiplier)
+        private List<Unit> CreateUnits(UnitData[] unitEntries, float scaleMultiplier)
         {
-            var units = new List<Unit>(unitEntries.Count);
+            var units = new List<Unit>(unitEntries.Length);
 
             foreach (var entry in unitEntries)
             {
@@ -91,7 +87,7 @@ namespace Project.Scripts.Level
             }
 
             var unit = _container.InstantiatePrefabForComponent<Unit>(_baseUnitPrefab, Vector3.zero,
-                Quaternion.identity, _unitsParent
+                Quaternion.identity, transform
             );
 
             ConfigureUnit(unit, config);
@@ -102,7 +98,7 @@ namespace Project.Scripts.Level
 
         private UnitConfigData GetConfig(string unitType)
         {
-            return _unitConfiguration.Units.FirstOrDefault(u => u.UnitType == unitType);
+            return _unitConfigurationSo.Units.FirstOrDefault(u => u.UnitType == unitType);
         }
 
         private void ConfigureUnit(Unit unit, UnitConfigData config)
@@ -116,7 +112,7 @@ namespace Project.Scripts.Level
             unit.transform.localScale = new Vector3(scale, scale, 1f);
         }
 
-        private void PlaceUnitsOnGrid(List<Unit> units, List<UnitData> unitEntries)
+        private void PlaceUnitsOnGrid(List<Unit> units, UnitData[] unitEntries)
         {
             for (var i = 0; i < units.Count; i++)
             {

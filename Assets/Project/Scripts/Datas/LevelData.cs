@@ -12,9 +12,8 @@ namespace Project.Scripts.Datas
 
         public int Width;
         public int Height;
-        public List<UnitData> Units;
+        public UnitData[] Units;
 
-        // Добавляем опциональный список валидных типов
         public void ValidateLevel(string fileName, List<string> validUnitTypes = null)
         {
             if (Width <= 0 || Height <= 0)
@@ -28,7 +27,7 @@ namespace Project.Scripts.Datas
 
             if (Units != null)
             {
-                for (var i = 0; i < Units.Count; i++)
+                for (var i = 0; i < Units.Length; i++)
                 {
                     Units[i].Validate(i, validUnitTypes);
                 }

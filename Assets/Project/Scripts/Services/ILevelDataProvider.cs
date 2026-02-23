@@ -1,6 +1,6 @@
 ﻿using Project.Scripts.Datas;
 
-namespace Project.Scripts.Level
+namespace Project.Scripts.Services
 {
     public interface ILevelDataProvider
     {

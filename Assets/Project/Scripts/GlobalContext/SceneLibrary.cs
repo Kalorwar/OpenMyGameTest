@@ -6,7 +6,7 @@ namespace Project.Scripts.GlobalContext
     public static class SceneLibrary
     {
         public const string LevelName = "Level";
-        private const int MaxLevelId = 3;
+        public const int MaxLevelId = 3;
         private const int FirstsLevelId = 1;
 
         private static readonly Dictionary<int, string> LevelIdToSceneMap =

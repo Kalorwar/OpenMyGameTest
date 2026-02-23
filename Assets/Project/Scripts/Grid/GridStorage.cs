@@ -27,5 +27,10 @@ namespace Project.Scripts.Grid
         {
             return _cells.FirstOrDefault(c => c.OccupiedUnit == unit);
         }
+
+        public List<GridCell> GetOccupiedCells()
+        {
+            return _cells.Where(c => c.OccupiedUnit != null).ToList();
+        }
     }
 }

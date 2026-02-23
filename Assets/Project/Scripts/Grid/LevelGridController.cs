@@ -1,5 +1,7 @@
-﻿using Project.Scripts.Level;
+﻿using System.Collections.Generic;
+using Project.Scripts.Datas;
 using Project.Scripts.Other;
+using Project.Scripts.Services;
 using Project.Scripts.Units;
 using UnityEngine;
 using Zenject;
@@ -17,19 +19,17 @@ namespace Project.Scripts.Grid
         private GridMatchesFinder _matchesFinder;
         private GridNormalizer _normalizer;
         private IPlayerInputState _playerInputState;
+        private ISaveLoadService _saveLoadService;
         private GridStorage _storage;
         private int _width;
 
         [Inject]
-        private void Construct(ILevelDataProvider levelDataProvider, IPlayerInputState playerInputState)
+        private void Construct(ILevelDataProvider levelDataProvider, IPlayerInputState playerInputState,
+            ISaveLoadService saveLoadService)
         {
             _levelDataProvider = levelDataProvider;
             _playerInputState = playerInputState;
-        }
-
-        private void Awake()
-        {
-            InitializeGrid();
+            _saveLoadService = saveLoadService;
         }
 
         public void OnDestroy()
@@ -37,7 +37,7 @@ namespace Project.Scripts.Grid
             _normalizer?.Dispose();
         }
 
-        private void InitializeGrid()
+        public void InitializeGrid()
         {
             _width = _levelDataProvider.CurrentLevelData.Width;
             _height = _levelDataProvider.CurrentLevelData.Height;
@@ -71,7 +71,7 @@ namespace Project.Scripts.Grid
             }
 
             ExecuteMove(fromCell, toCell);
-            _normalizer.TryNormalize();
+            TryNormalize();
         }
 
         public float GetCellSize()
@@ -87,6 +87,32 @@ namespace Project.Scripts.Grid
         public GridCell GetCellOfUnit(Unit unit)
         {
             return _storage.GetCellOfUnit(unit);
+        }
+
+        public UnitData[] GetCurrentUnitDatas()
+        {
+            var unitDataList = new List<UnitData>();
+            var occupiedCells = _storage.GetOccupiedCells();
+
+            foreach (var cell in occupiedCells)
+            {
+                var unit = cell.OccupiedUnit;
+                var unitData = new UnitData
+                {
+                    CellX = cell.Position.x,
+                    CellY = cell.Position.y,
+                    UnitType = unit.ElementType
+                };
+
+                unitDataList.Add(unitData);
+            }
+
+            return unitDataList.ToArray();
+        }
+
+        public void TryNormalize()
+        {
+            _normalizer.TryNormalize();
         }
 
         private bool TryGetMovePair(int fromX, int fromY, int toX, int toY, out GridCell fromCell, out GridCell toCell)

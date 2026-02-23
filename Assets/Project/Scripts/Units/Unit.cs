@@ -21,6 +21,7 @@ namespace Project.Scripts.Units
         private SpriteRenderer _spriteRenderer;
         private SwipeHandler _swipeHandler;
         private UnitAnimationController _unitAnimationController;
+        public event Action<Unit> OnUnitDestroyed;
 
         [Inject]
         public void Construct(LevelGridController grid, IPlayerInputState playerInputState)
@@ -89,6 +90,7 @@ namespace Project.Scripts.Units
                 .WaitForCompletion();
 
             Destroy(gameObject);
+            OnUnitDestroyed?.Invoke(this);
             callback?.Invoke();
             _destroyAnimationCoroutine = null;
         }

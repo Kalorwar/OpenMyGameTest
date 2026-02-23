@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Project.Scripts.ScriptableObjects
 {
     [CreateAssetMenu(fileName = "UnitConfiguration", menuName = "Scriptable Objects/Unit Configuration")]
-    public class UnitConfiguration : ScriptableObject
+    public class UnitConfigurationSo : ScriptableObject
     {
         [SerializeField] private List<UnitConfigData> _units;
 
