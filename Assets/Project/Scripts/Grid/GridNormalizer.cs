@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Project.Scripts.Other;
 using Project.Scripts.Units;
 using UnityEngine;
@@ -12,9 +11,12 @@ namespace Project.Scripts.Grid
     {
         private const float NormalizeGridDelay = 0.3f;
         private readonly MonoBehaviour _coroutineHost;
+        private readonly List<List<GridCell>> _figuresBuffer = new(8);
         private readonly GridMatchesFinder _gridMatchesFinder;
         private readonly int _height;
         private readonly GridLayoutCalculator _layout;
+
+        private readonly List<MoveOperation> _movesBuffer = new(32);
         private readonly IPlayerInputState _playerInputState;
         private readonly GridStorage _storage;
         private readonly int _width;
@@ -59,7 +61,7 @@ namespace Project.Scripts.Grid
         {
             for (var x = 0; x < _width; x++)
             {
-                var emptyFound = false;
+                var foundEmpty = false;
 
                 for (var y = 0; y < _height; y++)
                 {
@@ -67,9 +69,9 @@ namespace Project.Scripts.Grid
 
                     if (!occupied)
                     {
-                        emptyFound = true;
+                        foundEmpty = true;
                     }
-                    else if (emptyFound)
+                    else if (foundEmpty)
                     {
                         return true;
                     }
@@ -81,22 +83,29 @@ namespace Project.Scripts.Grid
 
         private void CheckFigures(Action onComplete)
         {
-            var figures = _gridMatchesFinder.FindAllValidMatches(_width, _height);
+            _figuresBuffer.Clear();
+            _gridMatchesFinder.FindAllValidMatches(_width, _height, _figuresBuffer);
 
-            if (figures.Count == 0)
+            if (_figuresBuffer.Count == 0)
             {
                 _playerInputState.SetPlayerCanAct(true);
                 onComplete?.Invoke();
                 return;
             }
 
-            var destroyCounter = new DestroyCounter(figures.Sum(area => area.Count), () =>
+            var totalUnits = 0;
+            foreach (var area in _figuresBuffer)
             {
-                OnAllDestroyed();
+                totalUnits += area.Count;
+            }
+
+            var destroyCounter = new DestroyCounter(totalUnits, () =>
+            {
                 onComplete?.Invoke();
+                OnAllDestroyed();
             });
 
-            foreach (var area in figures)
+            foreach (var area in _figuresBuffer)
             {
                 foreach (var cell in area)
                 {
@@ -126,20 +135,20 @@ namespace Project.Scripts.Grid
         {
             yield return new WaitForSeconds(NormalizeGridDelay);
 
-            var moves = CollectMoves();
+            CollectMoves();
 
-            if (moves.Count == 0)
+            if (_movesBuffer.Count == 0)
             {
                 CheckFigures(onComplete);
                 _normalizeCoroutine = null;
                 yield break;
             }
 
-            var pendingAnimations = moves.Count;
+            var pendingAnimations = _movesBuffer.Count;
 
-            foreach (var move in moves)
+            foreach (var move in _movesBuffer)
             {
-                ExecuteMove(move, () => { pendingAnimations--; });
+                ExecuteMove(move, () => pendingAnimations--);
             }
 
             yield return new WaitUntil(() => pendingAnimations <= 0);
@@ -147,32 +156,31 @@ namespace Project.Scripts.Grid
             _normalizeCoroutine = null;
         }
 
-        private List<MoveOperation> CollectMoves()
+        private void CollectMoves()
         {
-            var moves = new List<MoveOperation>();
+            _movesBuffer.Clear();
 
             for (var x = 0; x < _width; x++)
             {
-                var writeY = 0;
+                var emptyCount = 0;
 
                 for (var y = 0; y < _height; y++)
                 {
                     var cell = _storage.GetCell(x, y);
+
                     if (!cell.IsOccupied)
                     {
+                        emptyCount++;
                         continue;
                     }
 
-                    if (y != writeY)
+                    if (emptyCount > 0)
                     {
-                        moves.Add(new MoveOperation(x, y, writeY, cell.OccupiedUnit));
+                        var targetY = y - emptyCount;
+                        _movesBuffer.Add(new MoveOperation(x, y, targetY, cell.OccupiedUnit));
                     }
-
-                    writeY++;
                 }
             }
-
-            return moves;
         }
 
         private void ExecuteMove(MoveOperation move, Action onComplete)

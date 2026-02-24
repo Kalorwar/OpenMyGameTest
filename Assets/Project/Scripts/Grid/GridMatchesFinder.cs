@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,11 +6,10 @@ namespace Project.Scripts.Grid
 {
     public class GridMatchesFinder
     {
-        private readonly (int dx, int dy)[] _directions =
-        {
-            (1, 0), (-1, 0), (0, 1), (0, -1)
-        };
-
+        private readonly List<GridCell> _areaBuffer = new(32);
+        private readonly int[] _dx = { 1, -1, 0, 0 };
+        private readonly int[] _dy = { 0, 0, 1, -1 };
+        private readonly Stack<GridCell> _stack = new(32);
         private readonly GridStorage _storage;
 
         public GridMatchesFinder(GridStorage storage)
@@ -18,112 +17,100 @@ namespace Project.Scripts.Grid
             _storage = storage;
         }
 
-        public List<List<GridCell>> FindAllValidMatches(int width, int height)
+        public void FindAllValidMatches(int width, int height, List<List<GridCell>> result)
         {
-            var visited = new bool[width, height];
-            var result = new List<List<GridCell>>();
+            result.Clear();
+
+            var visited = new BitArray(width * height);
 
             for (var x = 0; x < width; x++)
             {
                 for (var y = 0; y < height; y++)
                 {
-                    if (IsAlreadyProcessed(x, y, visited))
+                    var index = x + y * width;
+                    if (visited[index])
                     {
                         continue;
                     }
 
-                    var area = CollectArea(x, y, visited);
-
-                    if (HasValidLine(area))
+                    var cell = _storage.GetCell(x, y);
+                    if (cell == null || !cell.IsOccupied)
                     {
-                        result.Add(area);
+                        visited[index] = true;
+                        continue;
+                    }
+
+                    _areaBuffer.Clear();
+                    CollectArea(cell, _areaBuffer, visited, width);
+
+                    if (HasValidLine(_areaBuffer))
+                    {
+                        result.Add(new List<GridCell>(_areaBuffer));
                     }
                 }
             }
-
-            return result;
         }
 
-        private bool IsAlreadyProcessed(int x, int y, bool[,] visited)
+        private void CollectArea(GridCell start, List<GridCell> area, BitArray visited, int width)
         {
-            var cell = _storage.GetCell(x, y);
-            return cell == null || !cell.IsOccupied || visited[x, y];
-        }
+            _stack.Clear();
+            _stack.Push(start);
+            MarkVisited(visited, start.Position.x, start.Position.y, width);
 
-        private List<GridCell> CollectArea(int startX, int startY, bool[,] visited)
-        {
-            var startCell = _storage.GetCell(startX, startY);
-            var targetType = startCell.OccupiedUnit.ElementType;
+            var targetType = start.OccupiedUnit.ElementType;
 
-            var stack = new Stack<GridCell>();
-            var area = new List<GridCell>();
-
-            stack.Push(startCell);
-            visited[startX, startY] = true;
-
-            while (stack.Count > 0)
+            while (_stack.Count > 0)
             {
-                var cell = stack.Pop();
+                var cell = _stack.Pop();
                 area.Add(cell);
 
-                foreach (var neighbor in GetMatchingNeighbors(cell, targetType, visited))
+                for (var i = 0; i < 4; i++)
                 {
-                    visited[neighbor.Position.x, neighbor.Position.y] = true;
-                    stack.Push(neighbor);
+                    var nx = cell.Position.x + _dx[i];
+                    var ny = cell.Position.y + _dy[i];
+
+                    if (!IsValid(nx, ny, targetType, visited, width))
+                    {
+                        continue;
+                    }
+
+                    MarkVisited(visited, nx, ny, width);
+                    _stack.Push(_storage.GetCell(nx, ny));
                 }
             }
-
-            return area;
         }
 
-        private bool IsValidMatch(GridCell neighbor, string type, bool[,] visited)
+        private bool IsValid(int x, int y, string type, BitArray visited, int width)
         {
-            if (visited[neighbor.Position.x, neighbor.Position.y])
+            if (x < 0 || y < 0 || x >= _storage.Width || y >= _storage.Height)
             {
                 return false;
             }
 
-            if (!neighbor.IsOccupied)
+            var index = x + y * width;
+            if (visited[index])
             {
                 return false;
             }
 
-            return neighbor.OccupiedUnit.ElementType == type;
+            var cell = _storage.GetCell(x, y);
+            if (!cell.IsOccupied)
+            {
+                return false;
+            }
+
+            return cell.OccupiedUnit.ElementType == type;
         }
 
-        private IEnumerable<GridCell> GetMatchingNeighbors(GridCell cell, string type, bool[,] visited)
+        private static void MarkVisited(BitArray visited, int x, int y, int width)
         {
-            foreach (var neighbor in GetNeighbors(cell))
-            {
-                if (IsValidMatch(neighbor, type, visited))
-                {
-                    yield return neighbor;
-                }
-            }
-        }
-
-        private IEnumerable<GridCell> GetNeighbors(GridCell cell)
-        {
-            foreach (var (dx, dy) in _directions)
-            {
-                var neighbor = _storage.GetCell(cell.Position.x + dx, cell.Position.y + dy);
-                if (neighbor != null)
-                {
-                    yield return neighbor;
-                }
-            }
+            visited[x + y * width] = true;
         }
 
         private bool HasValidLine(List<GridCell> area)
         {
-            return HasLineOfLength(area, c => c.Position.y, 3) ||
-                   HasLineOfLength(area, c => c.Position.x, 3);
-        }
-
-        private bool HasLineOfLength(List<GridCell> area, Func<GridCell, int> groupByKey, int minLength)
-        {
-            return area.GroupBy(groupByKey)
-                .Any(g => g.Count() >= minLength);
+            return area.GroupBy(c => c.Position.y).Any(g => g.Count() >= 3) ||
+                   area.GroupBy(c => c.Position.x).Any(g => g.Count() >= 3);
         }
     }
 }
