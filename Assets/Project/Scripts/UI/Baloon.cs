@@ -8,6 +8,7 @@ namespace Project.Scripts.UI
 {
     public class Balloon : MonoBehaviour
     {
+        private const float OutScreenOffset = 1;
         [SerializeField] private SpriteRenderer _spriteRenderer;
         private Sequence _animationSequence;
         private Camera _camera;
@@ -37,25 +38,25 @@ namespace Project.Scripts.UI
 
         public void Launch(float directionX, float speed, float swayAmplitude, float swayFrequency)
         {
-            var screenWidth = _camera.orthographicSize * _camera.aspect * 2;
-            var targetX = directionX > 0 ? screenWidth + 2 : -screenWidth - 2;
-            var distance = Mathf.Abs(targetX - transform.position.x);
-            var duration = distance / speed;
+            var screenHalfWidth = _camera.orthographicSize * _camera.aspect;
 
+            var startX = transform.position.x;
+            var targetX = directionX > 0 ? screenHalfWidth + OutScreenOffset : -screenHalfWidth - OutScreenOffset;
+
+            var distance = Mathf.Abs(targetX - startX);
+            var duration = distance / speed;
             _animationSequence = DOTween.Sequence();
             _animationSequence.Join(transform.DOMoveX(targetX, duration).SetEase(Ease.Linear));
-
             var startY = transform.position.y;
             _animationSequence.Join(
-                DOVirtual.Float(0, Mathf.PI * 2 * duration * swayFrequency, duration, t =>
-                {
-                    transform.position = new Vector3(
-                        transform.position.x,
-                        startY + Mathf.Sin(t) * swayAmplitude,
-                        0
-                    );
-                }).SetEase(Ease.Linear)
+                DOVirtual.Float(0, Mathf.PI * 2 * duration * swayFrequency, duration,
+                    t =>
+                    {
+                        transform.position =
+                            new Vector3(transform.position.x, startY + Mathf.Sin(t) * swayAmplitude, 0);
+                    }).SetEase(Ease.Linear)
             );
+
             _animationSequence.OnComplete(() => Destroy(gameObject));
         }
     }
