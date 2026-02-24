@@ -7,6 +7,8 @@ namespace Project.Scripts.UI
 {
     public class BalloonSpawner : MonoBehaviour
     {
+        private const float MinSpawnDelay = 2f;
+        private const float MaxSpawnDelay = 5f;
         [SerializeField] private Balloon _balloonPrefab;
         [SerializeField] private int _maxBalloons = 3;
         private Camera _camera;
@@ -39,7 +41,7 @@ namespace Project.Scripts.UI
                     SpawnBalloon();
                 }
 
-                var delay = Random.Range(2f, 5f);
+                var delay = Random.Range(MinSpawnDelay, MaxSpawnDelay);
                 yield return new WaitForSeconds(delay);
             }
         }
@@ -58,7 +60,7 @@ namespace Project.Scripts.UI
             var balloon = Instantiate(_balloonPrefab, spawnPos, Quaternion.identity, transform);
             _currentBalloonCount++;
 
-            balloon.GetComponent<Balloon>().OnDestroyed += () => _currentBalloonCount--;
+            balloon.GetComponent<Balloon>().OnDestroyed += () => _currentBalloonCount -= 1;
             balloon.Initialize(_configSo);
 
             var speed = Random.Range(_configSo.MinSpeed, _configSo.MaxSpeed);
