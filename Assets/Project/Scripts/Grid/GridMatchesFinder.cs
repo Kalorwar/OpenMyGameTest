@@ -76,17 +76,6 @@ namespace Project.Scripts.Grid
             return area;
         }
 
-        private IEnumerable<GridCell> GetMatchingNeighbors(GridCell cell, string type, bool[,] visited)
-        {
-            foreach (var neighbor in GetNeighbors(cell))
-            {
-                if (IsValidMatch(neighbor, type, visited))
-                {
-                    yield return neighbor;
-                }
-            }
-        }
-
         private bool IsValidMatch(GridCell neighbor, string type, bool[,] visited)
         {
             if (visited[neighbor.Position.x, neighbor.Position.y])
@@ -100,6 +89,17 @@ namespace Project.Scripts.Grid
             }
 
             return neighbor.OccupiedUnit.ElementType == type;
+        }
+
+        private IEnumerable<GridCell> GetMatchingNeighbors(GridCell cell, string type, bool[,] visited)
+        {
+            foreach (var neighbor in GetNeighbors(cell))
+            {
+                if (IsValidMatch(neighbor, type, visited))
+                {
+                    yield return neighbor;
+                }
+            }
         }
 
         private IEnumerable<GridCell> GetNeighbors(GridCell cell)

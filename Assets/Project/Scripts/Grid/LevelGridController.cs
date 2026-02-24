@@ -14,14 +14,15 @@ namespace Project.Scripts.Grid
         private const float ScreenFillAmount = 0.95f;
         private const float FixedBottomGridY = -2.9f;
         private int _height;
+
         private GridLayoutCalculator _layout;
         private ILevelDataProvider _levelDataProvider;
-
         private GridMatchesFinder _matchesFinder;
         private GridNormalizer _normalizer;
         private IPlayerInputState _playerInputState;
         private GridStorage _storage;
         private int _width;
+
         public event Action OnGridChanged;
 
         [Inject]

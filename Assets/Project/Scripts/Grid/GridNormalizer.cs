@@ -43,6 +43,8 @@ namespace Project.Scripts.Grid
 
         public void TryNormalize(Action onComplete = null)
         {
+            _playerInputState.SetPlayerCanAct(false);
+
             if (NeedsNormalization())
             {
                 StartNormalize(onComplete);
@@ -108,7 +110,6 @@ namespace Project.Scripts.Grid
         private void OnAllDestroyed()
         {
             TryNormalize();
-            _playerInputState.SetPlayerCanAct(true);
         }
 
         private void StartNormalize(Action onComplete)

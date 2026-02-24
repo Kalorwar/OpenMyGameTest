@@ -49,14 +49,12 @@ namespace Project.Scripts.Units
             TryMove(GetDirection(delta));
         }
 
-        private static Vector2Int GetDirection(Vector2 delta)
+        private Vector2Int GetDirection(Vector2 delta)
         {
-            return Mathf.Abs(delta.x) > Mathf.Abs(delta.y)
-                ? delta.x > 0 ? Vector2Int.right : Vector2Int.left
-                : delta.y > 0
-                    ? Vector2Int.up
-                    : Vector2Int.down;
+            return Mathf.Abs(delta.x) > Mathf.Abs(delta.y) ? delta.x > 0 ? Vector2Int.right : Vector2Int.left :
+                delta.y > 0 ? Vector2Int.up : Vector2Int.down;
         }
+
 
         private void TryMove(Vector2Int dir)
         {
