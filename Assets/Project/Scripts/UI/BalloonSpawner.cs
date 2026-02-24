@@ -20,9 +20,13 @@ namespace Project.Scripts.UI
             _configSo = configSo;
         }
 
-        private void Start()
+        private void Awake()
         {
             _camera = Camera.main;
+        }
+
+        public void StartSpawning()
+        {
             StartCoroutine(SpawnLoop());
         }
 

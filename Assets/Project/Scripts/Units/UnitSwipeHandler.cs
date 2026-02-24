@@ -47,7 +47,6 @@ namespace Project.Scripts.Units
             }
 
             _swipeDetected = true;
-            _playerInputState.SetPlayerCanAct(false);
 
             TryMove(GetDirection(delta));
         }
@@ -78,6 +77,7 @@ namespace Project.Scripts.Units
                 return;
             }
 
+            _playerInputState.SetPlayerCanAct(false);
             _gridController.TryMoveUnit(cell.Position.x, cell.Position.y, newX, newY);
         }
     }

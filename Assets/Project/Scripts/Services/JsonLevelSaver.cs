@@ -28,7 +28,6 @@ namespace Project.Scripts.Services
                 }
 
                 File.WriteAllText(filePath, json);
-                Debug.Log($"[JsonLevelSaver] Level saved to: {filePath}");
             }
             catch (Exception e)
             {

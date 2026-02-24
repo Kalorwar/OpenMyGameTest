@@ -15,15 +15,15 @@ MonoBehaviour:
   _sprites:
   - {fileID: 4889548848047085371, guid: e297cbaed25a9a54eaf62adfef2b70e5, type: 3}
   - {fileID: 5574635351299468239, guid: 679a0082148ac8f42a8dc13b433fa4cd, type: 3}
-  _minScale: 0.8
-  _maxScale: 1.1
+  _minScale: 0.5
+  _maxScale: 0.8
   _spawnDuration: 0.5
-  _minSpeed: 0.5
-  _maxSpeed: 1.5
-  _minSwayAmplitude: 0.3
-  _maxSwayAmplitude: 0.8
-  _minSwayFrequency: 0.2
-  _maxSwayFrequency: 0.5
+  _minSpeed: 0.2
+  _maxSpeed: 0.6
+  _minSwayAmplitude: 0.1
+  _maxSwayAmplitude: 0.3
+  _minSwayFrequency: 0.1
+  _maxSwayFrequency: 0.25
   _minHeight: -2
   _maxHeight: 3
-  _spawnOffsetX: 3
+  _spawnOffsetX: 1

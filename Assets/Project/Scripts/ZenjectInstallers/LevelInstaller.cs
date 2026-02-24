@@ -3,6 +3,7 @@ using Project.Scripts.Level;
 using Project.Scripts.Other;
 using Project.Scripts.ScriptableObjects;
 using Project.Scripts.Services;
+using Project.Scripts.UI;
 using UnityEngine;
 using Zenject;
 
@@ -15,6 +16,7 @@ namespace Project.Scripts.ZenjectInstallers
         [SerializeField] private UnitSpawner _unitSpawner;
         [SerializeField] private GameSessionController _gameSessionController;
         [SerializeField] private BalloonConfigSo _balloonConfigSo;
+        [SerializeField] private BalloonSpawner _balloonSpawner;
 
         public override void InstallBindings()
         {
@@ -28,6 +30,7 @@ namespace Project.Scripts.ZenjectInstallers
             Container.Bind<UnitSpawner>().FromComponentInNewPrefab(_unitSpawner).AsSingle().NonLazy();
             Container.Bind<GameSessionController>().FromComponentInNewPrefab(_gameSessionController).AsSingle()
                 .NonLazy();
+            Container.Bind<BalloonSpawner>().FromComponentInNewPrefab(_balloonSpawner).AsSingle().NonLazy();
         }
     }
 }

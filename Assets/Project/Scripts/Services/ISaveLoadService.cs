@@ -9,5 +9,6 @@ namespace Project.Scripts.Services
         public void Save(LevelData levelData);
         public LevelData LoadLevel();
         public void ClearSavedLevel();
+        public void SetCurrentLevel(int currentLevelId);
     }
 }

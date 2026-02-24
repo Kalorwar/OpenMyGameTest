@@ -8,54 +8,55 @@ namespace Project.Scripts.UI
 {
     public class Balloon : MonoBehaviour
     {
-        [SerializeField] private SpriteRenderer spriteRenderer;
-
-        private Tween _moveTween;
-        private Tween _scaleTween;
-        private Tween _swayTween;
+        [SerializeField] private SpriteRenderer _spriteRenderer;
+        private Sequence _animationSequence;
+        private Camera _camera;
         public event Action OnDestroyed;
+
+        private void Awake()
+        {
+            _camera = Camera.main;
+        }
 
         private void OnDestroy()
         {
             OnDestroyed?.Invoke();
-            _moveTween?.Kill();
-            _swayTween?.Kill();
-            _scaleTween?.Kill();
+            _animationSequence.Kill();
         }
 
         public void Initialize(BalloonConfigSo configSo)
         {
             if (configSo.Sprites.Length > 0)
             {
-                spriteRenderer.sprite = configSo.Sprites[Random.Range(0, configSo.Sprites.Length)];
+                _spriteRenderer.sprite = configSo.Sprites[Random.Range(0, configSo.Sprites.Length)];
             }
 
             var scale = Random.Range(configSo.MinScale, configSo.MaxScale);
-            transform.localScale = Vector3.zero;
-            transform.DOScale(scale, configSo.SpawnDuration).SetEase(Ease.OutBack);
-            spriteRenderer.color = new Color(1, 1, 1, Random.Range(0.7f, 1f));
+            transform.localScale = new Vector3(scale, scale, scale);
         }
 
         public void Launch(float directionX, float speed, float swayAmplitude, float swayFrequency)
         {
-            var screenWidth = Camera.main.orthographicSize * Camera.main.aspect * 2;
+            var screenWidth = _camera.orthographicSize * _camera.aspect * 2;
             var targetX = directionX > 0 ? screenWidth + 2 : -screenWidth - 2;
             var distance = Mathf.Abs(targetX - transform.position.x);
             var duration = distance / speed;
 
-            _moveTween = transform.DOMoveX(targetX, duration).SetEase(Ease.Linear)
-                .OnComplete(() => Destroy(gameObject));
+            _animationSequence = DOTween.Sequence();
+            _animationSequence.Join(transform.DOMoveX(targetX, duration).SetEase(Ease.Linear));
+
             var startY = transform.position.y;
-
-            _swayTween = DOVirtual.Float(0, Mathf.PI * 2 * duration * swayFrequency, duration, value =>
-            {
-                var offsetY = Mathf.Sin(value) * swayAmplitude;
-                transform.position = new Vector3(transform.position.x, startY + offsetY, transform.position.z);
-            }).SetEase(Ease.Linear);
-
-            _scaleTween = transform.DOScale(transform.localScale * 1.05f, 1f)
-                .SetLoops(-1, LoopType.Yoyo)
-                .SetEase(Ease.InOutSine);
+            _animationSequence.Join(
+                DOVirtual.Float(0, Mathf.PI * 2 * duration * swayFrequency, duration, t =>
+                {
+                    transform.position = new Vector3(
+                        transform.position.x,
+                        startY + Mathf.Sin(t) * swayAmplitude,
+                        0
+                    );
+                }).SetEase(Ease.Linear)
+            );
+            _animationSequence.OnComplete(() => Destroy(gameObject));
         }
     }
 }

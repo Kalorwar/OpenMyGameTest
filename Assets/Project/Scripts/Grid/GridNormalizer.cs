@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Project.Scripts.Other;
 using Project.Scripts.Units;
 using UnityEngine;
@@ -42,15 +41,15 @@ namespace Project.Scripts.Grid
             }
         }
 
-        public void TryNormalize()
+        public void TryNormalize(Action onComplete = null)
         {
             if (NeedsNormalization())
             {
-                StartNormalize();
+                StartNormalize(onComplete);
             }
             else
             {
-                CheckFigures();
+                CheckFigures(onComplete);
             }
         }
 
@@ -78,17 +77,22 @@ namespace Project.Scripts.Grid
             return false;
         }
 
-        private void CheckFigures()
+        private void CheckFigures(Action onComplete)
         {
             var figures = _gridMatchesFinder.FindAllValidMatches(_width, _height);
 
             if (figures.Count == 0)
             {
                 _playerInputState.SetPlayerCanAct(true);
+                onComplete?.Invoke();
                 return;
             }
 
-            var killCount = new KillCounter(figures.Sum(area => area.Count), OnAllKilled);
+            var destroyCounter = new DestroyCounter(figures.Sum(area => area.Count), () =>
+            {
+                OnAllDestroyed();
+                onComplete?.Invoke();
+            });
 
             foreach (var area in figures)
             {
@@ -96,28 +100,28 @@ namespace Project.Scripts.Grid
                 {
                     var unit = cell.OccupiedUnit;
                     cell.ClearUnit();
-                    unit.Destroy(() => killCount.Decrement());
+                    unit.Destroy(() => destroyCounter.Decrement());
                 }
             }
         }
 
-        private void OnAllKilled()
+        private void OnAllDestroyed()
         {
             TryNormalize();
             _playerInputState.SetPlayerCanAct(true);
         }
 
-        private void StartNormalize()
+        private void StartNormalize(Action onComplete)
         {
             if (_normalizeCoroutine != null)
             {
                 return;
             }
 
-            _normalizeCoroutine = _coroutineHost.StartCoroutine(NormalizeTick());
+            _normalizeCoroutine = _coroutineHost.StartCoroutine(NormalizeTick(onComplete));
         }
 
-        private IEnumerator NormalizeTick()
+        private IEnumerator NormalizeTick(Action onComplete)
         {
             yield return new WaitForSeconds(NormalizeGridDelay);
 
@@ -125,7 +129,7 @@ namespace Project.Scripts.Grid
 
             if (moves.Count == 0)
             {
-                CheckFigures();
+                CheckFigures(onComplete);
                 _normalizeCoroutine = null;
                 yield break;
             }
@@ -138,7 +142,7 @@ namespace Project.Scripts.Grid
             }
 
             yield return new WaitUntil(() => pendingAnimations <= 0);
-            CheckFigures();
+            CheckFigures(onComplete);
             _normalizeCoroutine = null;
         }
 
@@ -182,26 +186,6 @@ namespace Project.Scripts.Grid
             var sortOrder = GridSortOrderCalculator.Calculate(move.FromX, move.ToY);
 
             move.Unit.AnimateMoveTo(worldPos, sortOrder, onComplete);
-        }
-
-        private class KillCounter
-        {
-            private readonly Action _onComplete;
-            private int _remaining;
-
-            public KillCounter(int total, Action onComplete)
-            {
-                _remaining = total;
-                _onComplete = onComplete;
-            }
-
-            public void Decrement()
-            {
-                if (Interlocked.Decrement(ref _remaining) == 0)
-                {
-                    _onComplete?.Invoke();
-                }
-            }
         }
 
         private readonly struct MoveOperation

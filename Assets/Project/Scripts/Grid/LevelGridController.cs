@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Project.Scripts.Datas;
 using Project.Scripts.Other;
 using Project.Scripts.Services;
@@ -19,17 +20,15 @@ namespace Project.Scripts.Grid
         private GridMatchesFinder _matchesFinder;
         private GridNormalizer _normalizer;
         private IPlayerInputState _playerInputState;
-        private ISaveLoadService _saveLoadService;
         private GridStorage _storage;
         private int _width;
+        public event Action OnGridChanged;
 
         [Inject]
-        private void Construct(ILevelDataProvider levelDataProvider, IPlayerInputState playerInputState,
-            ISaveLoadService saveLoadService)
+        private void Construct(ILevelDataProvider levelDataProvider, IPlayerInputState playerInputState)
         {
             _levelDataProvider = levelDataProvider;
             _playerInputState = playerInputState;
-            _saveLoadService = saveLoadService;
         }
 
         public void OnDestroy()
@@ -72,6 +71,7 @@ namespace Project.Scripts.Grid
 
             ExecuteMove(fromCell, toCell);
             TryNormalize();
+            OnGridChanged?.Invoke();
         }
 
         public float GetCellSize()
@@ -112,7 +112,7 @@ namespace Project.Scripts.Grid
 
         public void TryNormalize()
         {
-            _normalizer.TryNormalize();
+            _normalizer.TryNormalize(OnNormalizationComplete);
         }
 
         private bool TryGetMovePair(int fromX, int fromY, int toX, int toY, out GridCell fromCell, out GridCell toCell)
@@ -185,6 +185,11 @@ namespace Project.Scripts.Grid
         {
             var cell = _storage.GetCell(x, y);
             return cell?.IsOccupied == false ? cell : null;
+        }
+
+        private void OnNormalizationComplete()
+        {
+            OnGridChanged?.Invoke();
         }
     }
 }

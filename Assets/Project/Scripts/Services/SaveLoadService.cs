@@ -19,9 +19,11 @@ namespace Project.Scripts.Services
 
         public void IncreaseCurrentLevel()
         {
-            if (CurrentLevelId < SceneLibrary.MaxLevelId)
+            var nextLevelId = CurrentLevelId + 1;
+
+            if (LevelExists(nextLevelId))
             {
-                CurrentLevelId += 1;
+                CurrentLevelId = nextLevelId;
             }
             else
             {
@@ -47,9 +49,34 @@ namespace Project.Scripts.Services
             _jsonLevelSaver.DeleteLevel(GetFileName());
         }
 
+        public void SetCurrentLevel(int currentLevelId)
+        {
+            CurrentLevelId = currentLevelId;
+            SaveCurrentLevelId();
+        }
+
+        private bool LevelExists(int levelId)
+        {
+            var levelName = SceneLibrary.GetLevelNameByLevelId(levelId);
+            var textAsset = Resources.Load<TextAsset>(levelName);
+            var exists = textAsset != null;
+
+            if (textAsset != null)
+            {
+                Resources.UnloadAsset(textAsset);
+            }
+
+            return exists;
+        }
+
         private void LoadCurrentLevelId()
         {
             CurrentLevelId = PlayerPrefs.GetInt(CurrentLevelSaveKey, 1);
+            if (!LevelExists(CurrentLevelId))
+            {
+                CurrentLevelId = 1;
+                SaveCurrentLevelId();
+            }
         }
 
         private void SaveCurrentLevelId()

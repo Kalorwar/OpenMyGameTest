@@ -36,7 +36,6 @@ namespace Project.Scripts.Services
 
             if (data != null)
             {
-                Debug.Log($"[JsonLevelParser] Loaded '{fileName}' from {source}");
                 data.ValidateLevel(fileName, validUnitTypes);
             }
             else

@@ -6,25 +6,23 @@ namespace Project.Scripts.ScriptableObjects
     public class BalloonConfigSo : ScriptableObject
     {
         [SerializeField] private Sprite[] _sprites;
-        [SerializeField] private float _minScale = 0.8f;
-        [SerializeField] private float _maxScale = 1.1f;
-        [SerializeField] private float _spawnDuration = 0.5f;
+        [SerializeField] private float _minScale;
+        [SerializeField] private float _maxScale;
 
-        [SerializeField] private float _minSpeed = 0.5f;
-        [SerializeField] private float _maxSpeed = 1.5f;
-        [SerializeField] private float _minSwayAmplitude = 0.3f;
-        [SerializeField] private float _maxSwayAmplitude = 0.8f;
-        [SerializeField] private float _minSwayFrequency = 0.2f;
-        [SerializeField] private float _maxSwayFrequency = 0.5f;
+        [SerializeField] private float _minSpeed;
+        [SerializeField] private float _maxSpeed;
+        [SerializeField] private float _minSwayAmplitude;
+        [SerializeField] private float _maxSwayAmplitude;
+        [SerializeField] private float _minSwayFrequency;
+        [SerializeField] private float _maxSwayFrequency;
 
-        [SerializeField] private float _minHeight = -2f;
-        [SerializeField] private float _maxHeight = 3f;
-        [SerializeField] private float _spawnOffsetX = 3f;
+        [SerializeField] private float _minHeight;
+        [SerializeField] private float _maxHeight;
+        [SerializeField] private float _spawnOffsetX;
 
         public Sprite[] Sprites => _sprites;
         public float MinScale => _minScale;
         public float MaxScale => _maxScale;
-        public float SpawnDuration => _spawnDuration;
         public float MinSpeed => _minSpeed;
         public float MaxSpeed => _maxSpeed;
         public float MinSwayAmplitude => _minSwayAmplitude;

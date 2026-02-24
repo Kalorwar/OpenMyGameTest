@@ -10,6 +10,7 @@ namespace Project.Scripts.UI
     public class RestartButton : MonoBehaviour
     {
         [SerializeField] private Button _button;
+        private int _currentLevel;
         private ISaveLoadService _saveLoadService;
         private ISceneController _sceneController;
 
@@ -18,6 +19,11 @@ namespace Project.Scripts.UI
         {
             _sceneController = sceneController;
             _saveLoadService = saveLoadService;
+        }
+
+        private void Start()
+        {
+            _currentLevel = _saveLoadService.CurrentLevelId;
         }
 
         private void OnEnable()
@@ -32,6 +38,11 @@ namespace Project.Scripts.UI
 
         private void RestartLevel()
         {
+            if (_currentLevel < _saveLoadService.CurrentLevelId)
+            {
+                _saveLoadService.SetCurrentLevel(_currentLevel);
+            }
+
             _saveLoadService.ClearSavedLevel();
             _sceneController.ResetLevel();
         }

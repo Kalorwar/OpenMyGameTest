@@ -1,7 +1,7 @@
-﻿using Project.Scripts.Datas;
-using Project.Scripts.GlobalContext;
+﻿using Project.Scripts.GlobalContext;
 using Project.Scripts.Grid;
 using Project.Scripts.Services;
+using Project.Scripts.UI;
 using UnityEngine;
 using Zenject;
 
@@ -9,7 +9,12 @@ namespace Project.Scripts.Level
 {
     public class GameSessionController : MonoBehaviour
     {
+        private const float SaveDelay = 0.3f;
+
+        private GridAutoSaveController _autoSaveController;
+        private BalloonSpawner _balloonSpawner;
         private bool _isRestarting;
+
         private ILevelDataProvider _levelDataProvider;
         private LevelGridController _levelGridController;
         private ISaveLoadService _saveLoadService;
@@ -20,7 +25,7 @@ namespace Project.Scripts.Level
         [Inject]
         private void Construct(UnitSpawner unitSpawner, LevelGridController levelGridController,
             ISaveLoadService saveLoadService, ILevelDataProvider levelDataProvider, IWinLoseService winLoseService,
-            ISceneController sceneController)
+            ISceneController sceneController, BalloonSpawner balloonSpawner)
         {
             _unitSpawner = unitSpawner;
             _levelGridController = levelGridController;
@@ -28,18 +33,27 @@ namespace Project.Scripts.Level
             _levelDataProvider = levelDataProvider;
             _winLoseService = winLoseService;
             _sceneController = sceneController;
+            _balloonSpawner = balloonSpawner;
         }
 
         private void Awake()
         {
             _levelGridController.InitializeGrid();
+            _autoSaveController = new GridAutoSaveController(SaveDelay, _levelDataProvider, _levelGridController,
+                _saveLoadService, CanSavePredicate);
         }
 
         private void Start()
         {
             _unitSpawner.SpawnUnits();
+            _balloonSpawner.StartSpawning();
             _winLoseService.Initialize(_unitSpawner.SpawnedUnits);
             _levelGridController.TryNormalize();
+        }
+
+        private void Update()
+        {
+            _autoSaveController?.Update(Time.deltaTime);
         }
 
         private void OnEnable()
@@ -54,12 +68,9 @@ namespace Project.Scripts.Level
             _sceneController.OnLevelRestart -= PrepareForRestart;
         }
 
-        private void OnApplicationQuit()
+        private void OnDestroy()
         {
-            if (!_isRestarting && !_winLoseService.IsGameEnded)
-            {
-                SaveGrid();
-            }
+            _autoSaveController?.Dispose();
         }
 
         private void PrepareForRestart()
@@ -67,21 +78,15 @@ namespace Project.Scripts.Level
             _isRestarting = true;
         }
 
-        private void SaveGrid()
-        {
-            var savedLevelData = new LevelData
-            {
-                Width = _levelDataProvider.CurrentLevelData.Width,
-                Height = _levelDataProvider.CurrentLevelData.Height,
-                Units = _levelGridController.GetCurrentUnitDatas()
-            };
-            _saveLoadService.Save(savedLevelData);
-        }
-
         private void OnLevelWin()
         {
             _saveLoadService.ClearSavedLevel();
             _saveLoadService.IncreaseCurrentLevel();
+        }
+
+        private bool CanSavePredicate()
+        {
+            return !_isRestarting && !_winLoseService.IsGameEnded;
         }
     }
 }

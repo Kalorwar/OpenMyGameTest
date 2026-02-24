@@ -18,7 +18,6 @@ namespace Project.Scripts.Level
         public bool IsGameEnded { get; private set; }
 
         public event Action OnWin;
-        public event Action OnLose;
 
         public void Initialize(List<Unit> units)
         {

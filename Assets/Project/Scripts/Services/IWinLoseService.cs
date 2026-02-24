@@ -8,7 +8,6 @@ namespace Project.Scripts.Services
     {
         public bool IsGameEnded { get; }
         public event Action OnWin;
-        public event Action OnLose;
         public void Initialize(List<Unit> units);
         public void ForceTriggerWin();
     }
