@@ -11,9 +11,7 @@ namespace Project.Scripts.Units
         private readonly Camera _camera;
         private readonly LevelGridController _gridController;
         private readonly IPlayerInputState _playerInputState;
-
         private readonly Unit _unit;
-
         private Vector2 _startPos;
         private bool _swipeDetected;
 

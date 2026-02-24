@@ -38,11 +38,7 @@ namespace Project.Scripts.UI
 
         private void RestartLevel()
         {
-            if (_currentLevel < _saveLoadService.CurrentLevelId)
-            {
-                _saveLoadService.SetCurrentLevel(_currentLevel);
-            }
-
+            _saveLoadService.SetCurrentLevel(_currentLevel);
             _saveLoadService.ClearSavedLevel();
             _sceneController.ResetLevel();
         }
