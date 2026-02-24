@@ -29,10 +29,5 @@ namespace Project.Scripts.Grid
             OccupiedUnit = null;
             IsOccupied = false;
         }
-
-        public bool HasUnit()
-        {
-            return OccupiedUnit != null;
-        }
     }
 }
