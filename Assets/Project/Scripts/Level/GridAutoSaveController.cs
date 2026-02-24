@@ -2,7 +2,6 @@
 using Project.Scripts.Datas;
 using Project.Scripts.Grid;
 using Project.Scripts.Services;
-using UnityEngine;
 
 namespace Project.Scripts.Level
 {
@@ -79,7 +78,6 @@ namespace Project.Scripts.Level
                 Units = _levelGridController.GetCurrentUnitDatas()
             };
             _saveLoadService.Save(savedLevelData);
-            Debug.Log("[GridAutoSaveController] Grid saved");
         }
     }
 }
